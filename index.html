@@ -61,22 +61,49 @@
 			} catch (e) {
 				scaleToFit = true;
 			}
+			var progressBarText = null; // 初始化为 null，确保只有一个元素被创建
+		
 			function progressHandler(progress) {
-				var percent = progress * 100 + '%';
+				var percent = (progress * 100).toFixed(2) + '%'; // 保留两位小数
 				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-				canvas.style.backgroundSize = '100% 1rem';
+				canvas.style.backgroundSize = '80% 1rem'; // 缩短进度条长度至80%的容器宽度
+		
+				if (!progressBarText) {
+					progressBarText = document.createElement('div');
+					progressBarText.style.position = 'absolute';
+					progressBarText.style.top = 'calc(50% - 3rem)'; // 调整位置，使其位于进度条正上方
+					progressBarText.style.left = '50%';
+					progressBarText.style.transform = 'translateX(-50%)';
+					progressBarText.style.color = 'white';
+					progressBarText.style.fontSize = '2rem'; // 增大字体大小
+					progressBarText.style.textAlign = 'center';
+					progressBarText.style.width = '100%';
+					progressBarText.style.height = '3rem'; // 调整高度以适应字体大小
+					progressBarText.style.lineHeight = '3rem';
+					progressBarText.style.zIndex = '1';
+					canvas.parentElement.appendChild(progressBarText);
+				}
+		
+				progressBarText.textContent = percent;
+		
+				if (progress >= 1) {
+					// 当进度完成时，移除百分比显示
+					progressBarText.parentNode.removeChild(progressBarText);
+					progressBarText = null; // 重置变量，确保下次可以重新创建
+				}
 			}
+		
 			function onResize() {
 				var container = canvas.parentElement;
 				var w;
 				var h;
-
+		
 				if (scaleToFit) {
 					w = window.innerWidth;
 					h = window.innerHeight;
-
+		
 					var r = 1080 / 1920;
-
+		
 					if (w * r > window.innerHeight) {
 						w = Math.min(w, Math.ceil(h / r));
 					}
@@ -85,7 +112,7 @@
 					w = 1920;
 					h = 1080;
 				}
-
+		
 				container.style.width = canvas.style.width = w + "px";
 				container.style.height = canvas.style.height = h + "px";
 				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
@@ -97,7 +124,7 @@
 			});
 			window.addEventListener('resize', onResize);
 			onResize();
-
+		
 			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
 				// Mobile device style: fill the whole browser client area with the game canvas:
 				const meta = document.createElement('meta');
